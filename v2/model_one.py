@@ -1,4 +1,5 @@
-from imports import *
+import numpy as np
+import tensorflow as tf
 
 
 class ModelOne:
@@ -45,7 +46,7 @@ class ModelOne:
 
     def _fit(self):
         # batch_size: tamanho dos lotes processados antes do backpropagation.
-        self.model.fit(self.x_train, self.y_train, batch_size=8, epochs=100)
+        self.model.fit(self.x_train, self.y_train, batch_size=32, epochs=100)
 
     def _compile(self):
         # optimizer="adam": é um dos mais famosos, tanto para classificação quanto para regrassão;
