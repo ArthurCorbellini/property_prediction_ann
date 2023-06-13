@@ -1,3 +1,7 @@
+"""
+    Criar uma logica para randomizar arquiteturas da rede.
+    - Assim, é possível ver qual arquitetura performou melhor.
+"""
 import numpy as np
 import tensorflow as tf
 
