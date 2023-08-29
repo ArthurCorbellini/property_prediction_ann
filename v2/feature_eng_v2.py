@@ -73,14 +73,14 @@ def _about_outliers_discrete():
     position = 0
     for var in discrete:
         position += 1
-        plt.subplot(2, 4, position)
+        plt.subplot(2, 7, position)
         fig = (data.groupby(var)[var].count() / len(data)).plot.bar()
         fig.set_title(var)
         fig.set_ylabel('Percentage of observations per label')
         fig.axhline(y=0.05, color='red')
 
         position += 1
-        plt.subplot(2, 4, position)
+        plt.subplot(2, 7, position)
         fig = data.groupby(var)['price'].median().plot()
         fig.set_ylabel('Median house Price per label')
         fig.set_title(var)

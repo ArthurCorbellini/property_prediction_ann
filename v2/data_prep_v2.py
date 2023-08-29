@@ -12,13 +12,13 @@ class DataPrep:
         self.x_train, self.x_test, self.y_train, self.y_test = self._build_train_test_data()
 
     def _prepare_data(self, neg_type):
-        df = self.data_set[self.data_set["Negotiation Type"] == neg_type]
+        df = self.data_set[self.data_set["negotiation_type"] == neg_type]
         df = self._remove_unnecessary_columns(df)
         return df
 
     def _remove_unnecessary_columns(self, df):
-        drop = ["New", "Property Type", "Negotiation Type",
-                "District", "Latitude", "Longitude"]
+        drop = ["new", "property_type", "negotiation_type",
+                "district", "latitude", "longitude"]
         return df.drop(drop, axis=1)
 
     def _build_train_test_data(self):
