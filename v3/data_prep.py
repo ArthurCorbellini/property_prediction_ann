@@ -107,18 +107,31 @@ class DataPrep:
 
     def _feature_engine_two(self):
         self._outlier_handling()
-
-        # é preciso remover os dados correspondentes em Y também quando removido de X
-
         # self._min_max_scaling() # zscore perfoma melhor que o min_max
         self._zscore_scaling()
         self._one_hot_encoding()
 
     def _outlier_handling(self):
-        self.x_train, self.x_test = ou.trimmer_normal_gaussian(
+        self.x_train, self.x_test, self.y_train, self.y_test = ou.trimmer_normal_gaussian(
             variables=['latitude', 'longitude'],
             x_train=self.x_train,
-            x_test=self.x_test
+            x_test=self.x_test,
+            y_train=self.y_train,
+            y_test=self.y_test,
+        )
+        self.x_train, self.x_test, self.y_train, self.y_test = ou.trimmer_skewed_iqr(
+            variables=['condo', 'size'],
+            x_train=self.x_train,
+            x_test=self.x_test,
+            y_train=self.y_train,
+            y_test=self.y_test,
+        )
+        self.x_train, self.x_test, self.y_train, self.y_test = ou.trimmer_normal_quantile(
+            variables=['rooms', 'toilets', 'suites', 'parking'],
+            x_train=self.x_train,
+            x_test=self.x_test,
+            y_train=self.y_train,
+            y_test=self.y_test,
         )
         # gu.plot_boxplot_and_hist(self.x_train, 'longitude')
         # gu.plot_boxplot_and_hist(self.x_train, 'latitude')
