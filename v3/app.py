@@ -1,26 +1,33 @@
-
-from feature_engine import discretisation as dsc
-import pandas as pd
 from data_prep import DataPrep
-import matplotlib.pyplot as plt
+from model_one import ModelOne
 
+# "sale" ou "rent"
 dp = DataPrep("rent")
-discretization = dsc.EqualFrequencyDiscretiser(
-    q=50, variables=["condo", "size"])
+# print(dp.data_frame)
+# print(dp.x_train)
 
-discretization.fit(dp.x_train)
-train_t = discretization.transform(dp.x_train)
-test_t = discretization.transform(dp.x_test)
+m_one = ModelOne(dp.x_train, dp.x_test, dp.y_train, dp.y_test)
 
-print(train_t.head())
+# print(m_one.results())
+m_one.model.summary()
+m_one.model.evaluate(m_one.x_test, m_one.y_test)
+# For regression, whe have two main metrics:
+# - MAE: mean absolute error, "on average, how wrong is each of my model's predictions";
+# - MSE: mean square error, "square the average errors". When larger errors are more significant than smaller errors;
+# - Huber: combination of MSE and MAE. Less sensitive to outliers than MSE.
+print("-- MAE")
+print(m_one.mae())
+print("-- MSE")
+print(m_one.mse())
 
-t1 = train_t.groupby(['condo'])['condo'].count()/len(train_t)
-t2 = test_t.groupby(['condo'])['condo'].count()/len(test_t)
+m_one.plot_history()
 
-temp = pd.concat([t1, t2], axis=1)
-temp.columns = ['train', 'test']
-temp.plot.bar()
-plt.xticks(rotation=0)
-plt.ylabel('Number of observartion per bin')
-plt.tight_layout()
-plt.show()
+# m_one.plot_predictions()
+
+# IMPORTANTE: TensorBoard e Weights & Biases são libs extras pra monitorar o desempenho dos experimentos/modelagens
+
+# o modelo tá muito agressivo, e tá causando overfitting. tentar ser mais cauteloso nos parâmetros do modelo, talvez reduzindo
+# seu tamanho e gradualmente ir aumentando.
+# - seria interessante também setar uma seed padrão no modelo, pra sempre usar os mesmos parâmetros de teste
+
+# https://github.com/mrdbourke/tensorflow-deep-learning/blob/main/01_neural_network_regression_in_tensorflow.ipynb

@@ -6,7 +6,7 @@ from feature_engine.encoding import OrdinalEncoder
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.preprocessing import StandardScaler, OneHotEncoder, MinMaxScaler
-from sklearn.compose import ColumnTransformer
+from sklearn.compose import ColumnTransformer, make_column_transformer
 
 import utils.graph_util as gu
 import utils.outlier_util as ou
@@ -21,19 +21,19 @@ import utils.outlier_util as ou
 price              int64 
 
 - continuous
-condo              int64 > outliers(todo) > zscored(ok)
-size               int64 > outliers(todo) > zscored(ok)
-latitude         float64 > outliers(todo) > zscored(ok)
-longitude        float64 > outliers(todo) > zscored(ok)
+condo              int64 > outliers(ok) > standardized(ok)
+size               int64 > outliers(ok) > standardized(ok)
+latitude         float64 > outliers(ok) > standardized(ok)
+longitude        float64 > outliers(ok) > standardized(ok)
 
 - discrete
-rooms              int64 > outliers(todo) > onehoted(ok)
-toilets            int64 > outliers(todo) > onehoted(ok)
-suites             int64 > outliers(todo) > onehoted(ok)
-parking            int64 > outliers(todo) > onehoted(ok)
-elevator           int64 > onehoted(ok)
-furnished          int64 > onehoted(ok)
-swimming_pool      int64 > onehoted(ok)
+rooms              int64 > outliers(ok) > standardized(ok)
+toilets            int64 > outliers(ok) > standardized(ok)
+suites             int64 > outliers(ok) > standardized(ok)
+parking            int64 > outliers(ok) > standardized(ok)
+elevator           int64 > (ok)
+furnished          int64 > (ok)
+swimming_pool      int64 > (ok)
 
 - categoric
 district          object > onehoted(ok)
@@ -41,7 +41,7 @@ district          object > onehoted(ok)
 dtype: object
 
  - There are 7 discrete variables
-rooms  -> values:  [ 2  1  3  4  5 10  6  7]
+rooms  -> values:  [2  1  3  4  5 10  6  7]
 toilets  -> values:  [2 3 4 1 5 6 7 8]
 suites  -> values:  [1 3 2 4 0 5]
 parking  -> values:  [1 2 3 4 5 6 8 9 0 7]
@@ -62,11 +62,11 @@ class DataPrep:
     def __init__(self, neg_type):
         self.data_set = pd.read_csv(
             "datasets/sao-paulo-properties-april-2019.csv")
+
         self._prepare_data(neg_type)
         self._build_train_test_data()
-
-        # self._feature_engine()
-        self._feature_engine_two()
+        self._outlier_handling()
+        self._feature_scaling()
 
     def _prepare_data(self, neg_type):
         # Seta o tipo de negociação (rent ou sale) e remove as colunas desnecessárias:
@@ -105,12 +105,6 @@ class DataPrep:
 
 # ---------------------------------------------------------------------------------------------
 
-    def _feature_engine_two(self):
-        self._outlier_handling()
-        # self._min_max_scaling() # zscore perfoma melhor que o min_max
-        self._zscore_scaling()
-        self._one_hot_encoding()
-
     def _outlier_handling(self):
         self.x_train, self.x_test, self.y_train, self.y_test = ou.trimmer_normal_gaussian(
             variables=['latitude', 'longitude'],
@@ -133,99 +127,25 @@ class DataPrep:
             y_train=self.y_train,
             y_test=self.y_test,
         )
-        # gu.plot_boxplot_and_hist(self.x_train, 'longitude')
-        # gu.plot_boxplot_and_hist(self.x_train, 'latitude')
 
-    def _zscore_scaling(self):
-        """
-            Aplicação do zscore nas variáveis que SÃO continuous
-        """
-        columns_index = [self.x_train.columns.get_loc(
-            col) for col in self.continuous]
-        sc = StandardScaler()
-        sc.set_output(transform="pandas")
-        self.x_train.iloc[:, columns_index] = sc.fit_transform(
-            self.x_train.iloc[:, columns_index])
-        self.x_test.iloc[:, columns_index] = sc.transform(
-            self.x_test.iloc[:, columns_index])
-
-    def _min_max_scaling(self):
-        sc = MinMaxScaler()
-        sc.set_output(transform="pandas")
-        self.x_train = sc.fit_transform(self.x_train)
-        self.x_test = sc.transform(self.x_test)
-
-    def _one_hot_encoding(self):
-        """
-        Dependendo do modelo utilizado, há a necessidade de ajustar os dados categóricos:
-        - Transformar a categoria (string) em um valor numérico (int ou bit);
-        - Nesse caso, há apenas o campo "district" categórico;
-        """
-        encoder = OneHotEncoder(
-            categories="auto",
-            drop="first",  # to return k-1 (drop=false to return k dummies)
-            sparse_output=False,
-            handle_unknown="error"
-        )
-        ct = ColumnTransformer(
-            [("ohe", encoder, self.categorical + self.discrete)],
+    def _feature_scaling(self):
+        ct = make_column_transformer(
+            (MinMaxScaler(),  # ou StandardScaler(), dependendo de qual performa melhor
+             ["condo", "size", "rooms", "toilets", "suites", "parking", "latitude", "longitude"]),
+            (OneHotEncoder(categories="auto",
+                           # to return k-1 (drop=false to return k dummies)
+                           drop="first",
+                           sparse_output=False,
+                           handle_unknown="error"),
+             ["district"]),
             remainder="passthrough"
         )
-        ct.set_output(transform="pandas")
-        self.x_train = ct.fit_transform(self.x_train)
+
+        ct.fit(self.x_train)
+        self.x_train = ct.transform(self.x_train)
         self.x_test = ct.transform(self.x_test)
 
-# ---------------------------------------------------------------------------------------------
 
-    def _feature_engine(self):
-        """
-            Missing values: OK
-            Outliers: 
-            - variáveis contínuas:
-              - condo e size -> Discretisation;
-              - lat e lng -> remover outliers;
-            - variáveis discretas:
-        """
-        self._build_train_test_data()
-        self._discretize_continuous_variables()
-
-    def _discretize_continuous_variables(self):
-        disc = EqualFrequencyDiscretiser(
-            q=100, variables=["condo", "size"], return_object=True)
-        disc.fit(self.x_train)
-        self.x_train = disc.transform(self.x_train)
-        self.x_test = disc.transform(self.x_test)
-        # pd.concat([self.x_train, self.y_train], axis=1).groupby(
-        #     'condo')['price'].mean().plot()
-        # plt.ylabel('teste')
-        # plt.show()
-        # pd.concat([self.x_train, self.y_train], axis=1).groupby(
-        #     'size')['price'].mean().plot()
-        # plt.ylabel('teste')
-        # plt.show()
-        enc = OrdinalEncoder(encoding_method='ordered')
-        enc.fit(self.x_train, self.y_train)
-        self.x_train = enc.transform(self.x_train)
-        self.x_test = enc.transform(self.x_test)
-        # pd.concat([self.x_train, self.y_train], axis=1).groupby(
-        #    'condo')['price'].mean().plot()
-        # plt.ylabel('teste')
-        # plt.show()
-        # pd.concat([self.x_train, self.y_train], axis=1).groupby(
-        #     'size')['price'].mean().plot()
-        # plt.ylabel('teste')
-        # plt.show()
-
-
-# ---------------------------------------------------------------------------------------------
-"""
-    def _feature_scaling(self, x_train, x_test):
-        sc = StandardScaler()
-        x_train = sc.fit_transform(x_train)
-        x_test = sc.transform(x_test)
-
-        return x_train, x_test
-"""
 dp = DataPrep("rent")
 # pd.set_option('display.max_columns', None)
 # print(dp.x_train)
