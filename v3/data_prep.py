@@ -65,7 +65,7 @@ class DataPrep:
 
         self._prepare_data(neg_type)
         self._build_train_test_data()
-        self._outlier_handling()
+        # self._outlier_handling()
         self._feature_scaling()
 
     def _prepare_data(self, neg_type):

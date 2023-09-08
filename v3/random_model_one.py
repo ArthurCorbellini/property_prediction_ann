@@ -17,6 +17,7 @@ class RandomModelOne:
         self.y_train = tf.constant(y_train)
         self.y_test = tf.constant(y_test)
 
+        self.config = ""
         tf.random.set_seed(42)
 
         self.model = self._build_random_model()
@@ -26,14 +27,14 @@ class RandomModelOne:
         self.y_pred = tf.squeeze(self.model.predict(self.x_test))
 
     def _build_random_model(self):
-        print("Architecture: ", file=file)
+        self._add_config("Architecture: ")
         model = tf.keras.models.Sequential()
         layers = random.randint(1, 5)
-        print("  Hidden layers: " + str(layers), file=file)
+        self._add_config("  Hidden layers: " + str(layers))
         for i in range(layers):
             units = random.randint(10, 200)
-            print("    Layer " + str(i) +
-                  " > number of neurons: " + str(units), file=file)
+            self._add_config("    Layer " + str(i) +
+                             " > number of neurons: " + str(units))
             model.add(tf.keras.layers.Dense(
                 units=units,
                 activation="relu"),
@@ -43,34 +44,36 @@ class RandomModelOne:
         return model
 
     def _random_compile(self):
-        print("Compiler: ", file=file)
+        self._add_config("Compiler: ")
         if random.randint(0, 1) == 0:
             lr = random.choice([0.1, 0.01, 0.001, 0.0001, 0.00001])
             opt = tf.keras.optimizers.Adam(learning_rate=lr)
-            print("  Optimizer: Adam > lr " + str(lr), file=file)
+            self._add_config("  Optimizer: Adam > lr " + str(lr))
         else:
             opt = tf.keras.optimizers.SGD()
-            print("  Optimizer: SGD", file=file)
+            self._add_config("  Optimizer: SGD")
 
         self.model.compile(loss=tf.keras.losses.mae,
                            optimizer=opt,
                            metrics=['mae'])
 
     def _random_fit(self):
-        print("Fit: ", file=file)
+        self._add_config("Fit: ")
         callback = tf.keras.callbacks.EarlyStopping(
             monitor='loss', patience=3)
 
         batch_size = random.choice([8, 16, 32, 64])
-        print("  Batch size: " + str(batch_size), file=file)
+        self._add_config("  Batch size: " + str(batch_size))
         self.history = self.model.fit(
             self.x_train,
             self.y_train,
             batch_size=batch_size,
             epochs=10000,
             callbacks=[callback],
-            verbose=1,
+            verbose=0,
         )
+        self._add_config(
+            "  Broke in " + str(self.history.epoch[-1] + 1) + " epochs")
 
     def compare_results(self):
         vertical_y_pred = self.y_pred.reshape(len(self.y_pred), 1)
@@ -94,6 +97,9 @@ class RandomModelOne:
         plt.xlabel("epochs")
         plt.show()
 
+    def _add_config(self, text):
+        self.config += "\n" + text
+
 # ----------------------------------------------------------------------------------------------------------
 # ----------------------------------------------------------------------------------------------------------
 # ----------------------------------------------------------------------------------------------------------
@@ -101,18 +107,16 @@ class RandomModelOne:
 
 for i in range(100):
     with open("v3/results.txt", "a") as file:
-        print("-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-", file=file)
-        print("\n", file=file)
-
         init = datetime.now()
         dp = DataPrep("rent")
         rm = RandomModelOne(dp.x_train, dp.x_test, dp.y_train, dp.y_test)
 
+        print("With outliers -\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-", file=file)
+        print(rm.config, file=file)
         print("Results:", file=file)
         print("  Training time: " + str(datetime.now() - init), file=file)
         print("  MAE: " + str(rm.mae()), file=file)
         print("  MSE: " + str(rm.mse()), file=file)
-
         print("\n", file=file)
 
         file.close()
