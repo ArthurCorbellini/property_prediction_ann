@@ -23,8 +23,6 @@ price              int64
 - continuous
 condo              int64 > outliers(ok) > standardized(ok)
 size               int64 > outliers(ok) > standardized(ok)
-latitude         float64 > outliers(ok) > standardized(ok)
-longitude        float64 > outliers(ok) > standardized(ok)
 
 - discrete
 rooms              int64 > outliers(ok) > standardized(ok)
@@ -38,7 +36,9 @@ swimming_pool      int64 > (ok)
 - categoric
 district          object > onehoted(ok)
 
-dtype: object
+- others
+latitude         float64
+longitude        float64
 
  - There are 7 discrete variables
 rooms  -> values:  [2  1  3  4  5 10  6  7]
@@ -75,7 +75,7 @@ class DataPrep:
         # - "new" possui poucas amostras;
         df = self.data_set[self.data_set["negotiation_type"] == neg_type]
         self.data_frame = df.drop(
-            ['property_type', 'negotiation_type', 'new'], axis=1)
+            ["property_type", "negotiation_type", "new", "latitude", "longitude"], axis=1)
         self._distinguish_variables()
 
     def _distinguish_variables(self):
@@ -83,9 +83,9 @@ class DataPrep:
         # - Numéricas são as int64 e float64;
         # - Categóricas são as object;
         self.numerical = [
-            var for var in self.data_frame.columns if self.data_frame[var].dtype != 'O']
+            var for var in self.data_frame.columns if self.data_frame[var].dtype != "O"]
         self.categorical = [
-            var for var in self.data_frame.columns if self.data_frame[var].dtype == 'O']
+            var for var in self.data_frame.columns if self.data_frame[var].dtype == "O"]
         # Identificação das variáveis discretas:
         # - Se tiver MENOS que 20 registros, é considerado uma variável DISCRETA;
         self.discrete = []
@@ -95,7 +95,7 @@ class DataPrep:
         # Identificação das variáveis contínuas:
         # - Se tiver MAIS que 20 registros, é considerado uma variável CONTÍNUA;
         self.continuous = [
-            var for var in self.numerical if var not in self.discrete and var not in ['price']]
+            var for var in self.numerical if var not in self.discrete and var not in ["price"]]
 
     def _build_train_test_data(self):
         X = self.data_frame.loc[:, self.data_frame.columns != "price"]
@@ -107,21 +107,21 @@ class DataPrep:
 
     def _outlier_handling(self):
         self.x_train, self.x_test, self.y_train, self.y_test = ou.trimmer_normal_gaussian(
-            variables=['latitude', 'longitude'],
+            variables=["latitude", "longitude"],
             x_train=self.x_train,
             x_test=self.x_test,
             y_train=self.y_train,
             y_test=self.y_test,
         )
         self.x_train, self.x_test, self.y_train, self.y_test = ou.trimmer_skewed_iqr(
-            variables=['condo', 'size'],
+            variables=["condo", "size"],
             x_train=self.x_train,
             x_test=self.x_test,
             y_train=self.y_train,
             y_test=self.y_test,
         )
         self.x_train, self.x_test, self.y_train, self.y_test = ou.trimmer_normal_quantile(
-            variables=['rooms', 'toilets', 'suites', 'parking'],
+            variables=["rooms", "toilets", "suites", "parking"],
             x_train=self.x_train,
             x_test=self.x_test,
             y_train=self.y_train,
@@ -131,7 +131,7 @@ class DataPrep:
     def _feature_scaling(self):
         ct = make_column_transformer(
             (MinMaxScaler(),  # ou StandardScaler(), dependendo de qual performa melhor
-             ["condo", "size", "rooms", "toilets", "suites", "parking", "latitude", "longitude"]),
+             ["condo", "size", "rooms", "toilets", "suites", "parking"]),
             (OneHotEncoder(categories="auto",
                            # to return k-1 (drop=false to return k dummies)
                            drop="first",
@@ -147,5 +147,5 @@ class DataPrep:
 
 
 dp = DataPrep("rent")
-# pd.set_option('display.max_columns', None)
+# pd.set_option("display.max_columns", None)
 # print(dp.x_train)

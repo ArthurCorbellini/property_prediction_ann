@@ -1,6 +1,7 @@
 .vscode/
 private/
 webscrap/
+logs/
 
 # -------------------------------------------------------
 # -------------- Default python .gitignore --------------

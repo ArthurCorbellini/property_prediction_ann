@@ -20,7 +20,7 @@ print(m_one.mae())
 print("-- MSE")
 print(m_one.mse())
 
-m_one.plot_history()
+# m_one.plot_history()
 
 # m_one.plot_predictions()
 
@@ -28,6 +28,9 @@ m_one.plot_history()
 
 # o modelo tá muito agressivo, e tá causando overfitting. tentar ser mais cauteloso nos parâmetros do modelo, talvez reduzindo
 # seu tamanho e gradualmente ir aumentando.
-# - seria interessante também setar uma seed padrão no modelo, pra sempre usar os mesmos parâmetros de teste
+# - Verificar e "normalize" os dados;
+# - Dropout do Keras pra tentar tratar o overfitting
+#   - Use a large learning rate with decay and a large momentum. Increase your learning rate by a factor of 10 to 100 and use a high momentum value of 0.9 or 0.99.
+#   - Constrain the size of network weights. A large learning rate can result in very large network weights. Imposing a constraint on the size of network weights, such as max-norm regularization, with a size of 4 or 5 has been shown to improve results.
 
 # https://github.com/mrdbourke/tensorflow-deep-learning/blob/main/01_neural_network_regression_in_tensorflow.ipynb

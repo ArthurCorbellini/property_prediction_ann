@@ -39,6 +39,10 @@ class RandomModelOne:
                 units=units,
                 activation="relu"),
             )
+            # if (i + 1) < layers:
+            #     dropout_rate = 0.2
+            #     model.add(tf.keras.layers.Dropout(dropout_rate))
+            #     self._add_config("      Dropout rate: " + str(dropout_rate))
         model.add(tf.keras.layers.Dense(units=1))
 
         return model
@@ -60,7 +64,7 @@ class RandomModelOne:
     def _random_fit(self):
         self._add_config("Fit: ")
         callback = tf.keras.callbacks.EarlyStopping(
-            monitor='loss', patience=3)
+            monitor='loss', patience=5)
 
         batch_size = random.choice([8, 16, 32, 64])
         self._add_config("  Batch size: " + str(batch_size))
@@ -106,12 +110,12 @@ class RandomModelOne:
 
 
 for i in range(100):
-    with open("v3/results.txt", "a") as file:
+    with open("logs/log_1.txt", "a") as file:
         init = datetime.now()
         dp = DataPrep("rent")
         rm = RandomModelOne(dp.x_train, dp.x_test, dp.y_train, dp.y_test)
 
-        print("With outliers -\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-", file=file)
+        print("-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-", file=file)
         print(rm.config, file=file)
         print("Results:", file=file)
         print("  Training time: " + str(datetime.now() - init), file=file)
