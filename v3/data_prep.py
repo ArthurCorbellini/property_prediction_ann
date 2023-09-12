@@ -8,8 +8,7 @@ import numpy as np
 from sklearn.preprocessing import StandardScaler, OneHotEncoder, MinMaxScaler
 from sklearn.compose import ColumnTransformer, make_column_transformer
 
-import utils.graph_util as gu
-import utils.outlier_util as ou
+from utils import graph_util as gu, outlier_util as ou
 
 """
 ------------------------- Data Types -------------------------
@@ -65,7 +64,7 @@ class DataPrep:
 
         self._prepare_data(neg_type)
         self._build_train_test_data()
-        # self._outlier_handling()
+        self._outlier_handling()
         self._feature_scaling()
 
     def _prepare_data(self, neg_type):
@@ -106,13 +105,13 @@ class DataPrep:
 # ---------------------------------------------------------------------------------------------
 
     def _outlier_handling(self):
-        self.x_train, self.x_test, self.y_train, self.y_test = ou.trimmer_normal_gaussian(
-            variables=["latitude", "longitude"],
-            x_train=self.x_train,
-            x_test=self.x_test,
-            y_train=self.y_train,
-            y_test=self.y_test,
-        )
+        # self.x_train, self.x_test, self.y_train, self.y_test = ou.trimmer_normal_gaussian(
+        #     variables=["latitude", "longitude"],
+        #     x_train=self.x_train,
+        #     x_test=self.x_test,
+        #     y_train=self.y_train,
+        #     y_test=self.y_test,
+        # )
         self.x_train, self.x_test, self.y_train, self.y_test = ou.trimmer_skewed_iqr(
             variables=["condo", "size"],
             x_train=self.x_train,

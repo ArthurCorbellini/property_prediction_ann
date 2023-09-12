@@ -65,7 +65,7 @@ def _about_outliers_discrete():
         fig = (data.groupby(var)[var].count() / len(data)).plot.bar()
         fig.set_title(var)
         fig.set_ylabel('Percentage of observations per label')
-        fig.axhline(y=0.05, color='red')
+        fig.axhline(y=0.01, color='red')
 
         position += 1
         plt.subplot(2, 7, position)

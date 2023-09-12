@@ -22,7 +22,7 @@ def trimmer_normal_quantile(variables, x_train, x_test, y_train, y_test):
     - Quantile range based;
     - Its more agressive than Gaussian.
     """
-    return _build_trimmer(variables, 'quantiles', 0.05, x_train, x_test, y_train, y_test)
+    return _build_trimmer(variables, 'quantiles', 0.01, x_train, x_test, y_train, y_test)
 
 
 def _build_trimmer(variables, capping_method, fold, x_train, x_test, y_train, y_test):
