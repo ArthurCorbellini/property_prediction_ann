@@ -63,8 +63,11 @@ class DataPrep:
             "datasets/sao-paulo-properties-april-2019.csv")
 
         self._prepare_data(neg_type)
+        print(self.data_frame.info())
+
+        self._pre_outlier_handling()
         self._build_train_test_data()
-        self._outlier_handling()
+        # self._outlier_handling()
         self._feature_scaling()
 
     def _prepare_data(self, neg_type):
@@ -100,9 +103,19 @@ class DataPrep:
         X = self.data_frame.loc[:, self.data_frame.columns != "price"]
         Y = self.data_frame["price"]
         self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(
-            X, Y, test_size=0.2, random_state=0)
+            X, Y, test_size=0.2, random_state=1)
 
 # ---------------------------------------------------------------------------------------------
+
+    def _pre_outlier_handling(self):
+        self.data_frame = ou.trimmer_skewed_iqr(
+            variables=["condo", "size"],
+            data_frame=self.data_frame,
+        )
+        self.data_frame = ou.trimmer_normal_quantile(
+            variables=["rooms", "toilets", "suites", "parking"],
+            data_frame=self.data_frame,
+        )
 
     def _outlier_handling(self):
         # self.x_train, self.x_test, self.y_train, self.y_test = ou.trimmer_normal_gaussian(

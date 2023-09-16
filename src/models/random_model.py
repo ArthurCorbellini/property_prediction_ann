@@ -4,9 +4,6 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 import pandas as pd
 import random
-from datetime import datetime
-
-from data_prep import DataPrep
 
 
 class RandomModel:
@@ -30,7 +27,7 @@ class RandomModel:
     def _build_random_model(self):
         self._add_config("Architecture: ")
         model = tf.keras.models.Sequential()
-        layers = random.randint(1, 5)
+        layers = random.randint(3, 5)
         self._add_config("  Hidden layers: " + str(layers))
         for i in range(layers):
             units = random.randint(10, 200)
@@ -114,26 +111,3 @@ class RandomModel:
 
     def _add_config(self, text):
         self.config += "\n" + text
-
-# ----------------------------------------------------------------------------------------------------------
-# ----------------------------------------------------------------------------------------------------------
-# ----------------------------------------------------------------------------------------------------------
-
-
-for i in range(100):
-    with open("logs/log_2.txt", "a") as file:
-        init = datetime.now()
-        dp = DataPrep("rent")
-        rm = RandomModel(dp.x_train, dp.x_test, dp.y_train, dp.y_test)
-
-        print("-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-", file=file)
-        print(rm.config, file=file)
-        print("Results:", file=file)
-        print("  Training time: " + str(datetime.now() - init), file=file)
-        print("  MAE (train) -> " + str(rm.mae_train()), file=file)
-        print("  MAE ---------> " + str(rm.mae()), file=file)
-        print("  MSE (train) -> " + str(rm.mse_train()), file=file)
-        print("  MSE ---------> " + str(rm.mse()), file=file)
-        print("\n", file=file)
-
-        file.close()

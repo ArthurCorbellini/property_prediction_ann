@@ -3,7 +3,6 @@ import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import pandas as pd
-from data_prep import DataPrep
 
 
 class Model:
@@ -14,7 +13,7 @@ class Model:
         self.y_train = tf.constant(y_train)
         self.y_test = tf.constant(y_test)
 
-        tf.random.set_seed(20)
+        tf.random.set_seed(42)
 
         self.model = self._build_model()
         self._compile()
@@ -26,9 +25,10 @@ class Model:
     def _build_model(self):
         return tf.keras.models.Sequential([
             # model.add(tf.keras.Input(shape=(104,))),  # quantidade de entradas
-            tf.keras.layers.Dense(units=200, activation="relu"),
             tf.keras.layers.Dense(units=150, activation="relu"),
             tf.keras.layers.Dense(units=100, activation="relu"),
+            tf.keras.layers.Dense(units=50, activation="relu"),
+
             # Output Layer -> quanto a função de ativação:
             # - Classificação com APENAS duas categorias -> é recomendado usar a "Sigmoid Function";
             # - Classificação com MAIS DE duas categorias -> é recomendado usar a "Soft Max Function";
@@ -52,7 +52,7 @@ class Model:
             self.x_train,
             self.y_train,
             batch_size=16,
-            epochs=500,
+            epochs=10000,
             callbacks=[callback],
             # verbose=0,
         )

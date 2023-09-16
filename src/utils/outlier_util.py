@@ -40,3 +40,24 @@ def _build_trimmer(variables, capping_method, fold, x_train, x_test, y_train, y_
     x_test_trimmed = trimmer.transform(x_test)
     y_test_trimmed = y_test[x_test_trimmed.index]
     return x_train_trimmed, x_test_trimmed, y_train_trimmed, y_test_trimmed
+
+
+def trimmer_skewed_iqr(variables, data_frame):
+    return _build_trimmer(variables, 'iqr', 1.5, data_frame)
+
+
+def trimmer_normal_gaussian(variables, data_frame):
+    return _build_trimmer(variables, 'gaussian', 3, data_frame)
+
+
+def trimmer_normal_quantile(variables, data_frame):
+    return _build_trimmer(variables, 'quantiles', 0.01, data_frame)
+
+
+def _build_trimmer(variables, capping_method, fold, data_frame):
+    return OutlierTrimmer(
+        variables=variables,
+        capping_method=capping_method,
+        tail='both',
+        fold=fold
+    ).fit_transform(data_frame)
