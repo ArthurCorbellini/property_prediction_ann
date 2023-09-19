@@ -3,6 +3,7 @@ private/
 webscrap/
 logs/
 todo.txt
+old/
 
 # -------------------------------------------------------
 # -------------- Default python .gitignore --------------
