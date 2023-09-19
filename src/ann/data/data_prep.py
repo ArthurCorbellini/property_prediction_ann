@@ -8,7 +8,7 @@ import utils.outlier_util as ou
 
 
 def build_houses_to_rent():
-    data = pd.read_csv("src/data/datasets/houses_to_rent_v2.csv")
+    data = pd.read_csv("src/ann/data/datasets/houses_to_rent_v2.csv")
 
     data.rename({"parking spaces": "parking_spaces",
                  "hoa (R$)": "hoa",
