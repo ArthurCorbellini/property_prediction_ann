@@ -1,5 +1,5 @@
 from data.data_prep import build_houses_to_rent
-from models.random_model import RandomModel
+from neural_models.random_model import RandomModel
 from datetime import datetime
 
 for i in range(100):
