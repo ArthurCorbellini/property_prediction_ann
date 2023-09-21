@@ -3,7 +3,7 @@ from models.random_model import RandomModel
 from datetime import datetime
 
 for i in range(100):
-    with open("src/ann/logs/log_1.txt", "a") as file:
+    with open("src/logs/log_1.txt", "a") as file:
         init = datetime.now()
         X_train, X_test, y_train, y_test = build_houses_to_rent()
         rm = RandomModel(X_train, X_test, y_train, y_test)
