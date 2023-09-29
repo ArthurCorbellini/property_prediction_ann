@@ -34,23 +34,18 @@ model.fit(
     # verbose=0,
 )
 
-y_pred_train = tf.squeeze(model.predict(X_train))
-y_pred = tf.squeeze(model.predict(X_test))
+model.save("exported_models/neural_model_v1.h5")
 
-print("TRAIN: ")
-print(" MAE: " + str(tf.metrics.mean_absolute_error(y_true=y_train, y_pred=y_pred_train)))
-print(" MSE: " + str(tf.metrics.mean_squared_error(y_true=y_train, y_pred=y_pred_train)))
-print("TEST: ")
-print(" MAE: " + str(tf.metrics.mean_absolute_error(y_true=y_test, y_pred=y_pred)))
-print(" MSE: " + str(tf.metrics.mean_squared_error(y_true=y_test, y_pred=y_pred)))
+# y_pred_train = tf.squeeze(model.predict(X_train))
+# y_pred = tf.squeeze(model.predict(X_test))
 
-y_pred = y_pred.numpy()
-y_test = y_test.numpy()
-print(pd.DataFrame({'y_true': y_test, 'y_pred': y_pred}).to_string())
+# print("TRAIN: ")
+# print(" MAE: " + str(tf.metrics.mean_absolute_error(y_true=y_train, y_pred=y_pred_train)))
+# print(" MSE: " + str(tf.metrics.mean_squared_error(y_true=y_train, y_pred=y_pred_train)))
+# print("TEST: ")
+# print(" MAE: " + str(tf.metrics.mean_absolute_error(y_true=y_test, y_pred=y_pred)))
+# print(" MSE: " + str(tf.metrics.mean_squared_error(y_true=y_test, y_pred=y_pred)))
 
-
-# vertical_y_pred = y_pred.reshape(len(y_pred), 1)
-# vertical_y_test = np.array(y_test).reshape(len(y_test), 1)
-# np.set_printoptions(precision=2)
-# # np.set_printoptions(precision=2, threshold=np.inf)
-# print(np.concatenate((vertical_y_pred, vertical_y_test), 1))
+# y_pred = y_pred.numpy()
+# y_test = y_test.numpy()
+# print(pd.DataFrame({'y_true': y_test, 'y_pred': y_pred}).to_string())

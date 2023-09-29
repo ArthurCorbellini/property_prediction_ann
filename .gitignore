@@ -4,6 +4,7 @@ webscrap/
 logs/
 todo.txt
 old/
+exported_models/
 
 # -------------------------------------------------------
 # -------------- Default python .gitignore --------------
