@@ -3,6 +3,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.compose import make_column_transformer
 from sklearn.preprocessing import OneHotEncoder, MinMaxScaler
+import joblib
 
 import utils.outlier_util as ou
 
@@ -51,6 +52,8 @@ def build_houses_to_rent():
     )
 
     ct.fit(X_train)
+    joblib.dump(ct, 'exports/column_transformer.pkl')
+
     X_train = ct.transform(X_train)
     X_test = ct.transform(X_test)
 

@@ -1,6 +1,5 @@
 # -> pip install -r requirements.txt
 
-# Required packages
 tensorflow==2.12.0
 pandas==2.0.2
 numpy==1.23.5
@@ -8,3 +7,4 @@ seaborn==0.12.2
 matplotlib==3.7.1
 scikit-learn==1.2.2
 feature-engine==1.6.1
+joblib

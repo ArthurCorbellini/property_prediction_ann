@@ -34,7 +34,7 @@ model.fit(
     # verbose=0,
 )
 
-model.save("exported_models/neural_model_v1.h5")
+model.save("exports/neural_model_v1.h5")
 
 # y_pred_train = tf.squeeze(model.predict(X_train))
 # y_pred = tf.squeeze(model.predict(X_test))
