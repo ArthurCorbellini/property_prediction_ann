@@ -17,7 +17,8 @@ def build_model_and_predict(architecture):
     for layer, units in architecture['units_per_layer'].items():
         model.add(tf.keras.layers.Dense(
             units=units,
-            activation="relu"),
+            activation="relu",
+            kernel_initializer=tf.keras.initializers.HeNormal(seed=1)),
         )
 
     model.add(tf.keras.layers.Dense(units=1))
@@ -58,12 +59,17 @@ def build_arch(current_arch):
 
     def change_choise(): return random.choice([-1, 0, 1])
 
-    last_layer = max(new_arch['units_per_layer'].keys())
-    choise = change_choise()
-    if choise > 0 and last_layer < 10:
-        new_arch['units_per_layer'][last_layer + 1] = 1
-    if choise < 0 and last_layer > 1:
-        new_arch['units_per_layer'].pop(last_layer)
+    choise = random.choice([-1, 0, 1])
+    if choise > 0:
+        for _ in range(choise):
+            last_layer = max(new_arch['units_per_layer'].keys())
+            if last_layer < 10:
+                new_arch['units_per_layer'][last_layer + 1] = 1
+    if choise < 0:
+        for _ in range(abs(choise)):
+            last_layer = max(new_arch['units_per_layer'].keys())
+            if last_layer > 1:
+                new_arch['units_per_layer'].pop(last_layer)
 
     for layer, units in new_arch['units_per_layer'].items():
         choise = change_choise()
@@ -75,13 +81,13 @@ def build_arch(current_arch):
     choise = change_choise()
     if choise > 0 and new_arch['learning_rate'] != 0.1:
         new_arch['learning_rate'] = new_arch['learning_rate'] * 10
-    if choise < 0 and new_arch['learning_rate'] != 0.00001:
+    if choise < 0 and new_arch['learning_rate'] != 0.0001:
         new_arch['learning_rate'] = new_arch['learning_rate'] / 10
 
     choise = change_choise()
     if choise > 0 and new_arch['batch_size'] < 4096.0:
         new_arch['batch_size'] = new_arch['batch_size'] * 2
-    if choise < 0 and new_arch['batch_size'] > 4.0:
+    if choise < 0 and new_arch['batch_size'] > 32.0:
         new_arch['batch_size'] = new_arch['batch_size'] / 2
 
     return new_arch
@@ -90,22 +96,28 @@ def build_arch(current_arch):
 
 
 temperature = 100
-cooling_rate = 0.99
+cooling_rate = 0.98
 
 current_arch = {
-    'units_per_layer': {
-        1: 1,
-    },
-    'learning_rate': 0.1,
-    'batch_size': 32,
+    'units_per_layer': {1: 1},
+    'learning_rate': 0.01,
+    'batch_size': 256.0,
     'mae': None,
 }
 current_arch['mae'] = build_model_and_predict(current_arch)
 best_arch = copy.deepcopy(current_arch)
+# best_arch = {
+#     'units_per_layer': {1: 1},
+#     'learning_rate': 0.01,
+#     'batch_size': 256.0,
+#     'mae': None,
+# }
+# best_arch['mae'] = build_model_and_predict(current_arch)
 
 i = 0
-while temperature > 1:
-    with open("src/logs/log_01.txt", "a") as file:
+# for i in range(200):
+while temperature > 0.1:
+    with open("src/logs/log_06-FINAL.txt", "a") as file:
         init = datetime.now()
         i += 1
         print("-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-", file=file)
