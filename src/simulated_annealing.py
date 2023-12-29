@@ -30,7 +30,7 @@ def build_model_and_predict(architecture):
         metrics=['mae'],
     )
 
-    model.fit(
+    history = model.fit(
         X_train,
         y_train,
         batch_size=int(architecture['batch_size']),
@@ -42,16 +42,20 @@ def build_model_and_predict(architecture):
         verbose=0,
     )
 
+    last_epoch = str(history.epoch[-1] + 1)
     y_pred = tf.squeeze(model.predict(X_test))
-    return tf.metrics.mean_absolute_error(y_true=y_test, y_pred=y_pred).numpy()
+    return tf.metrics.mean_absolute_error(y_true=y_test, y_pred=y_pred).numpy(), last_epoch
 
 
-def accept_neighbor(current_mae, new_mae, temperature):
+def accept_neighbor(probability):
+    return random.random() <= probability
+
+
+def accept_probability(current_mae, new_mae, temperature):
     if new_mae < current_mae:
-        return True
+        return 1.0
     else:
-        probability = math.exp((current_mae - new_mae) / temperature)
-        return random.random() < probability
+        return math.exp((current_mae - new_mae) / temperature)
 
 
 def build_arch(current_arch):
@@ -59,7 +63,7 @@ def build_arch(current_arch):
 
     def change_choise(): return random.choice([-1, 0, 1])
 
-    choise = random.choice([-1, 0, 1])
+    choise = change_choise()
     if choise > 0:
         for _ in range(choise):
             last_layer = max(new_arch['units_per_layer'].keys())
@@ -75,7 +79,11 @@ def build_arch(current_arch):
         choise = change_choise()
         if choise != 0:
             new_units = units + random.randint(-50, 50)
-            if 1 < new_units < 1000:
+            if new_units < 11:
+                new_arch['units_per_layer'][layer] = 11
+            elif new_units > 1000:
+                new_arch['units_per_layer'][layer] = 1000
+            else:
                 new_arch['units_per_layer'][layer] = new_units
 
     choise = change_choise()
@@ -103,8 +111,10 @@ current_arch = {
     'learning_rate': 0.01,
     'batch_size': 256.0,
     'mae': None,
+    'last_epoch': None,
 }
-current_arch['mae'] = build_model_and_predict(current_arch)
+current_arch['mae'], current_arch['last_epoch'] = build_model_and_predict(
+    current_arch)
 best_arch = copy.deepcopy(current_arch)
 # best_arch = {
 #     'units_per_layer': {1: 1},
@@ -117,7 +127,7 @@ best_arch = copy.deepcopy(current_arch)
 i = 0
 # for i in range(200):
 while temperature > 0.1:
-    with open("src/logs/log_06-FINAL.txt", "a") as file:
+    with open("src/logs/log_004-FINAL.txt", "a") as file:
         init = datetime.now()
         i += 1
         print("-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-", file=file)
@@ -126,10 +136,17 @@ while temperature > 0.1:
         print("cooling_rate: " + str(cooling_rate), file=file)
 
         new_arch = build_arch(current_arch)
-        new_arch['mae'] = build_model_and_predict(new_arch)
+        new_arch['mae'], new_arch['last_epoch'] = build_model_and_predict(
+            new_arch)
 
+        probability = accept_probability(
+            current_arch['mae'],
+            new_arch['mae'],
+            temperature
+        )
+        print("acc_probability: " + str(probability), file=file)
         new_become_current = False
-        if accept_neighbor(current_arch['mae'], new_arch['mae'], temperature):
+        if accept_neighbor(probability):
             new_become_current = True
             current_arch = copy.deepcopy(new_arch)
         print("new_become_current: " + str(new_become_current), file=file)
@@ -149,6 +166,7 @@ while temperature > 0.1:
         print(" - learning_rate: " + str(new_arch['learning_rate']), file=file)
         print(" - batch_size: " + str(new_arch['batch_size']), file=file)
         print(" - mae: " + str(new_arch['mae']), file=file)
+        print(" - last_epoch: " + str(new_arch['last_epoch']), file=file)
 
         print("current: ", file=file)
         print(" - units_per_layer: " +
@@ -157,6 +175,7 @@ while temperature > 0.1:
               str(current_arch['learning_rate']), file=file)
         print(" - batch_size: " + str(current_arch['batch_size']), file=file)
         print(" - mae: " + str(current_arch['mae']), file=file)
+        print(" - last_epoch: " + str(current_arch['last_epoch']), file=file)
 
         print("best: ", file=file)
         print(" - units_per_layer: " +
@@ -165,5 +184,8 @@ while temperature > 0.1:
               str(best_arch['learning_rate']), file=file)
         print(" - batch_size: " + str(best_arch['batch_size']), file=file)
         print(" - mae: " + str(best_arch['mae']), file=file)
+        print(" - last_epoch: " + str(best_arch['last_epoch']), file=file)
 
         file.close()
+
+# model.save("exports/neural_model_12-final.h5")
